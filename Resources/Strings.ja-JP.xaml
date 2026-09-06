@@ -1,0 +1,54 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- アプリ全般 -->
+    <sys:String x:Key="App_Title">Wi-Fi アナライザー</sys:String>
+    <sys:String x:Key="App_Description">周囲の Wi-Fi アクセスポイントをリアルタイムにスキャン・解析します</sys:String>
+
+    <!-- コントロール・ツールバー -->
+    <sys:String x:Key="Toolbar_AutoScan">自動スキャン</sys:String>
+    <sys:String x:Key="Toolbar_ManualScan">今すぐスキャン</sys:String>
+    <sys:String x:Key="Toolbar_Interval">スキャン間隔:</sys:String>
+    <sys:String x:Key="Toolbar_Interval_3s">3 秒</sys:String>
+    <sys:String x:Key="Toolbar_Interval_5s">5 秒</sys:String>
+    <sys:String x:Key="Toolbar_Interval_10s">10 秒</sys:String>
+    <sys:String x:Key="Toolbar_Filter_All">すべて</sys:String>
+    <sys:String x:Key="Toolbar_Filter_24GHz">2.4 GHz</sys:String>
+    <sys:String x:Key="Toolbar_Filter_5GHz">5 GHz</sys:String>
+    <sys:String x:Key="Toolbar_Filter_6GHz">6 GHz</sys:String>
+    <sys:String x:Key="Toolbar_Search_Placeholder">SSID または BSSID で検索...</sys:String>
+    <sys:String x:Key="Toolbar_Language">言語 / Language</sys:String>
+
+    <!-- 接続中アクセスポイントカード -->
+    <sys:String x:Key="ConnectedCard_Title">接続中のネットワーク</sys:String>
+    <sys:String x:Key="ConnectedCard_NotConnected">現在 Wi-Fi に接続されていません</sys:String>
+    <sys:String x:Key="ConnectedCard_Interface">アダプター:</sys:String>
+    <sys:String x:Key="ConnectedCard_Signal">電波強度:</sys:String>
+    <sys:String x:Key="ConnectedCard_Channel">チャンネル:</sys:String>
+    <sys:String x:Key="ConnectedCard_Band">周波数帯:</sys:String>
+    <sys:String x:Key="ConnectedCard_Security">セキュリティ:</sys:String>
+    <sys:String x:Key="ConnectedCard_Bssid">BSSID:</sys:String>
+
+    <!-- データグリッド列ヘッダー -->
+    <sys:String x:Key="Grid_Status">状態</sys:String>
+    <sys:String x:Key="Grid_Status_Connected">接続中</sys:String>
+    <sys:String x:Key="Grid_Ssid">SSID (ネットワーク名)</sys:String>
+    <sys:String x:Key="Grid_Bssid">BSSID (MACアドレス)</sys:String>
+    <sys:String x:Key="Grid_Signal">電波強度</sys:String>
+    <sys:String x:Key="Grid_Band">周波数帯</sys:String>
+    <sys:String x:Key="Grid_Channel">チャンネル</sys:String>
+    <sys:String x:Key="Grid_Frequency">周波数</sys:String>
+    <sys:String x:Key="Grid_Security">セキュリティ</sys:String>
+    <sys:String x:Key="Grid_RadioType">規格</sys:String>
+    <sys:String x:Key="Grid_HiddenNetwork">&lt;非公開ネットワーク&gt;</sys:String>
+
+    <!-- ステータスバー -->
+    <sys:String x:Key="Status_TotalNetworks">検出: {0} 件</sys:String>
+    <sys:String x:Key="Status_LastScan">最終スキャン: {0}</sys:String>
+    <sys:String x:Key="Status_Scanning">スキャン中...</sys:String>
+    <sys:String x:Key="Status_Ready">準備完了</sys:String>
+    <sys:String x:Key="Status_NoAdapter">利用可能な Wi-Fi アダプターが見つかりません。</sys:String>
+    <sys:String x:Key="Status_LocationWarning">※ Windows の位置情報サービスが無効化されている場合、一部の SSID が取得できない場合があります。</sys:String>
+
+</ResourceDictionary>

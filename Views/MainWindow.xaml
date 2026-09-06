@@ -1,0 +1,429 @@
+<Window x:Class="WiFiAnalyzer.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:WiFiAnalyzer.ViewModels"
+        xmlns:models="clr-namespace:WiFiAnalyzer.Models"
+        mc:Ignorable="d"
+        Title="{DynamicResource App_Title}"
+        Icon="pack://application:,,,/Resources/app.ico"
+        Height="720" Width="1100"
+        MinHeight="500" MinWidth="850"
+        FontFamily="{StaticResource MainFont}"
+        Background="#F8FAFC"
+        WindowStartupLocation="Manual">
+
+    <Window.Resources>
+        <!-- DataGrid 用のモダンなスタイル定義 -->
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#F1F5F9" />
+            <Setter Property="Foreground" Value="#475569" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="BorderBrush" Value="#E2E8F0" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+        </Style>
+
+        <Style TargetType="DataGridCell">
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridCell">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#E0F2FE" />
+                    <Setter Property="Foreground" Value="#0369A1" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="DataGridRow">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="BorderBrush" Value="#F1F5F9" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F8FAFC" />
+                </Trigger>
+                <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                    <Setter Property="Background" Value="#F0F9FF" />
+                    <Setter Property="BorderBrush" Value="#BAE6FD" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <!-- 0: ヘッダー / ツールバー -->
+            <RowDefinition Height="Auto" />
+            <!-- 1: 接続中アクセスポイントカード -->
+            <RowDefinition Height="Auto" />
+            <!-- 2: メイン一覧 -->
+            <RowDefinition Height="*" />
+            <!-- 3: ステータスバー -->
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- ==================== 0: ツールバー ==================== -->
+        <Border Grid.Row="0" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="16,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <!-- タイトル & アイコン -->
+                    <ColumnDefinition Width="Auto" />
+                    <!-- スキャン制御 -->
+                    <ColumnDefinition Width="Auto" />
+                    <!-- バンドフィルター -->
+                    <ColumnDefinition Width="Auto" />
+                    <!-- スペーサー -->
+                    <ColumnDefinition Width="*" />
+                    <!-- 検索 & 言語 -->
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- アプリタイトル -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,24,0">
+                    <Image Source="pack://application:,,,/Resources/app.ico" Width="28" Height="28" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality" />
+                    <TextBlock Text="{DynamicResource App_Title}" FontSize="18" FontWeight="Bold" Foreground="#0F172A" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <!-- スキャンコントロール -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,20,0">
+                    <!-- 自動スキャントグル -->
+                    <CheckBox IsChecked="{Binding IsAutoScanEnabled, Mode=TwoWay}"
+                              Content="{DynamicResource Toolbar_AutoScan}"
+                              VerticalAlignment="Center"
+                              Margin="0,0,14,0"
+                              FontWeight="Medium"
+                              Foreground="#334155" />
+
+                    <!-- スキャン間隔 -->
+                    <TextBlock Text="{DynamicResource Toolbar_Interval}" VerticalAlignment="Center" Margin="0,0,6,0" Foreground="#64748B" FontSize="13" />
+                    <ComboBox SelectedItem="{Binding ScanIntervalSeconds, Mode=TwoWay}"
+                              ItemsSource="{Binding AvailableIntervals}"
+                              Width="75" Height="30"
+                              VerticalContentAlignment="Center"
+                              Margin="0,0,14,0">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding StringFormat='{}{0}s'}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <!-- 手動スキャンボタン -->
+                    <Button Command="{Binding ManualScanCommand}"
+                            Height="32" Padding="14,0"
+                            Background="#0EA5E9" Foreground="White"
+                            FontWeight="SemiBold" BorderThickness="0"
+                            Cursor="Hand">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6" />
+                            </Style>
+                        </Button.Resources>
+                        <StackPanel Orientation="Horizontal">
+                            <!-- スキャン中の回転アニメーション風表示 -->
+                            <TextBlock Text="🔄" Margin="0,0,6,0" VerticalAlignment="Center" FontSize="13" />
+                            <TextBlock Text="{DynamicResource Toolbar_ManualScan}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <!-- バンドフィルター -->
+                <Border Grid.Column="2" Background="#F1F5F9" CornerRadius="6" Padding="3" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="{DynamicResource Toolbar_Filter_All}"
+                                     IsChecked="{Binding SelectedBandFilter, Converter={x:Null}, Mode=OneWay}"
+                                     Click="OnFilterAllClicked"
+                                     GroupName="BandFilter"
+                                     Style="{StaticResource {x:Type ToggleButton}}"
+                                     Padding="10,4" Margin="1" BorderThickness="0" Background="Transparent" />
+                        <RadioButton Content="{DynamicResource Toolbar_Filter_24GHz}"
+                                     Click="OnFilter24Clicked"
+                                     GroupName="BandFilter"
+                                     Style="{StaticResource {x:Type ToggleButton}}"
+                                     Padding="10,4" Margin="1" BorderThickness="0" Background="Transparent" />
+                        <RadioButton Content="{DynamicResource Toolbar_Filter_5GHz}"
+                                     Click="OnFilter5Clicked"
+                                     GroupName="BandFilter"
+                                     Style="{StaticResource {x:Type ToggleButton}}"
+                                     Padding="10,4" Margin="1" BorderThickness="0" Background="Transparent" />
+                        <RadioButton Content="{DynamicResource Toolbar_Filter_6GHz}"
+                                     Click="OnFilter6Clicked"
+                                     GroupName="BandFilter"
+                                     Style="{StaticResource {x:Type ToggleButton}}"
+                                     Padding="10,4" Margin="1" BorderThickness="0" Background="Transparent" />
+                    </StackPanel>
+                </Border>
+
+                <!-- 検索 & 言語切り替え -->
+                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- 検索ボックス -->
+                    <Border Background="#F8FAFC" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6" Width="220" Height="32" Margin="0,0,12,0">
+                        <Grid>
+                            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     BorderThickness="0" Background="Transparent"
+                                     VerticalContentAlignment="Center" Padding="8,0,24,0"
+                                     FontSize="13" />
+                            <TextBlock Text="🔍" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="#94A3B8" IsHitTestVisible="False" />
+                        </Grid>
+                    </Border>
+
+                    <!-- 言語切替ボタン -->
+                    <ComboBox SelectedValuePath="Tag"
+                              SelectedValue="{Binding CurrentLanguage, Mode=OneWay}"
+                              SelectionChanged="OnLanguageSelectionChanged"
+                              Height="32" Width="100"
+                              VerticalContentAlignment="Center">
+                        <ComboBoxItem Content="日本語" Tag="ja-JP" />
+                        <ComboBoxItem Content="English" Tag="en-US" />
+                        <ComboBoxItem Content="Auto" Tag="Auto" />
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ==================== 1: 接続中 AP カード ==================== -->
+        <Border Grid.Row="1" Margin="16,12,16,6" CornerRadius="8"
+                BorderBrush="{StaticResource ConnectedBorderBrush}" BorderThickness="1"
+                Background="#F0F9FF" Padding="14,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- アイコン -->
+                <Border Grid.Column="0" Width="40" Height="40" CornerRadius="20" Background="#0284C7" Margin="0,0,14,0" VerticalAlignment="Center">
+                    <TextBlock Text="📶" FontSize="18" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+
+                <!-- 接続情報 -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <!-- 接続中表示 -->
+                    <StackPanel Visibility="{Binding ConnectedAccessPoint, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <Border Background="#0284C7" CornerRadius="4" Padding="6,1" Margin="0,0,8,0" VerticalAlignment="Center">
+                                <TextBlock Text="{DynamicResource Grid_Status_Connected}" Foreground="White" FontSize="11" FontWeight="Bold" />
+                            </Border>
+                            <TextBlock Text="{Binding ConnectedAccessPoint.Ssid, Mode=OneWay}"
+                                       FontSize="16" FontWeight="Bold" Foreground="#0F172A" VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <!-- 詳細情報列 -->
+                        <WrapPanel Orientation="Horizontal">
+                            <TextBlock Foreground="#475569" FontSize="12" Margin="0,0,16,0">
+                                <Run Text="{DynamicResource ConnectedCard_Bssid}" /> <Run Text="{Binding ConnectedAccessPoint.Bssid, Mode=OneWay}" FontFamily="{StaticResource CodeFont}" FontWeight="Medium" />
+                            </TextBlock>
+                            <TextBlock Foreground="#475569" FontSize="12" Margin="0,0,16,0">
+                                <Run Text="{DynamicResource ConnectedCard_Band}" /> <Run Text="{Binding ConnectedAccessPoint.BandDisplay, Mode=OneWay}" FontWeight="Medium" />
+                            </TextBlock>
+                            <TextBlock Foreground="#475569" FontSize="12" Margin="0,0,16,0">
+                                <Run Text="{DynamicResource ConnectedCard_Channel}" /> <Run Text="{Binding ConnectedAccessPoint.Channel, Mode=OneWay}" FontWeight="Medium" /> (<Run Text="{Binding ConnectedAccessPoint.FrequencyDisplay, Mode=OneWay}" />)
+                            </TextBlock>
+                            <TextBlock Foreground="#475569" FontSize="12" Margin="0,0,16,0">
+                                <Run Text="{DynamicResource ConnectedCard_Security}" /> <Run Text="{Binding ConnectedAccessPoint.SecurityDisplay, Mode=OneWay}" FontWeight="Medium" />
+                            </TextBlock>
+                        </WrapPanel>
+                    </StackPanel>
+
+                    <!-- 未接続時表示 -->
+                    <TextBlock Text="{DynamicResource ConnectedCard_NotConnected}"
+                               FontSize="14" FontWeight="Medium" Foreground="#64748B"
+                               Visibility="{Binding ConnectedAccessPoint, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}" />
+                </StackPanel>
+
+                <!-- 電波強度 & アダプタ情報 -->
+                <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                                Visibility="{Binding ConnectedAccessPoint, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ProgressBar Value="{Binding ConnectedAccessPoint.SignalQuality, Mode=OneWay}"
+                                     Maximum="100" Width="100" Height="8"
+                                     Foreground="{Binding ConnectedAccessPoint.SignalQuality, Converter={StaticResource SignalToBrushConverter}}"
+                                     VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBlock Text="{Binding ConnectedAccessPoint.SignalDisplay, Mode=OneWay}"
+                                   FontWeight="SemiBold" Foreground="#0F172A" VerticalAlignment="Center" FontSize="13" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding AdapterName}" Foreground="#64748B" FontSize="11" HorizontalAlignment="Right" Margin="0,4,0,0" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ==================== 2: メイン AP 一覧 DataGrid ==================== -->
+        <Border Grid.Row="2" Margin="16,6,16,8" Background="White" CornerRadius="8" BorderBrush="#E2E8F0" BorderThickness="1" ClipToBounds="True">
+            <DataGrid ItemsSource="{Binding DisplayAccessPoints}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      IsReadOnly="True"
+                      SelectionMode="Single"
+                      GridLinesVisibility="Horizontal"
+                      HorizontalGridLinesBrush="#F1F5F9"
+                      BorderThickness="0"
+                      Background="White"
+                      RowHeight="44">
+                <DataGrid.Columns>
+                    <!-- 状態（接続中バッジ） -->
+                    <DataGridTemplateColumn Header="{DynamicResource Grid_Status}" Width="80">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type models:AccessPointInfo}">
+                                <Border Background="#0284C7" CornerRadius="4" Padding="6,2" HorizontalAlignment="Center"
+                                        Visibility="{Binding IsConnected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="{DynamicResource Grid_Status_Connected}" Foreground="White" FontSize="10" FontWeight="Bold" />
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- SSID (ネットワーク名) -->
+                    <DataGridTemplateColumn Header="{DynamicResource Grid_Ssid}" Width="2*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type models:AccessPointInfo}">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Ssid}"
+                                               FontWeight="SemiBold"
+                                               FontSize="13"
+                                               Foreground="{Binding IsHidden, Converter={x:Null}}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="#0F172A" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsHidden}" Value="True">
+                                                        <Setter Property="Foreground" Value="#94A3B8" />
+                                                        <Setter Property="FontStyle" Value="Italic" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- 電波強度 (Signal Quality & Bar) -->
+                    <DataGridTemplateColumn Header="{DynamicResource Grid_Signal}" Width="160">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type models:AccessPointInfo}">
+                                <Grid VerticalAlignment="Center">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <ProgressBar Grid.Column="0" Value="{Binding SignalQuality}" Maximum="100" Height="8"
+                                                 Foreground="{Binding SignalQuality, Converter={StaticResource SignalToBrushConverter}}"
+                                                 Background="#E2E8F0" BorderThickness="0" Margin="0,0,8,0" />
+                                    <TextBlock Grid.Column="1" Text="{Binding SignalDisplay}" FontSize="12" Foreground="#334155" VerticalAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- 周波数帯 (Band バッジ) -->
+                    <DataGridTemplateColumn Header="{DynamicResource Grid_Band}" Width="90">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type models:AccessPointInfo}">
+                                <Border Background="{Binding Band, Converter={StaticResource BandToBadgeBrushConverter}}"
+                                        BorderBrush="{Binding Band, Converter={StaticResource BandToBadgeBrushConverter}, ConverterParameter=Border}"
+                                        BorderThickness="1" CornerRadius="10" Padding="8,2" HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding BandDisplay}" FontSize="11" FontWeight="Bold"
+                                               Foreground="{Binding Band, Converter={StaticResource BandToBadgeBrushConverter}, ConverterParameter=Border}" />
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- チャンネル -->
+                    <DataGridTextColumn Header="{DynamicResource Grid_Channel}" Binding="{Binding Channel}" Width="70">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center" />
+                                <Setter Property="FontWeight" Value="Medium" />
+                                <Setter Property="Foreground" Value="#334155" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <!-- 周波数 (MHz) -->
+                    <DataGridTextColumn Header="{DynamicResource Grid_Frequency}" Binding="{Binding FrequencyDisplay}" Width="95">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#64748B" />
+                                <Setter Property="FontSize" Value="12" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <!-- セキュリティ -->
+                    <DataGridTextColumn Header="{DynamicResource Grid_Security}" Binding="{Binding SecurityDisplay}" Width="150">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#334155" />
+                                <Setter Property="FontSize" Value="12" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <!-- 規格 (RadioType) -->
+                    <DataGridTextColumn Header="{DynamicResource Grid_RadioType}" Binding="{Binding RadioType}" Width="80">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#64748B" />
+                                <Setter Property="FontSize" Value="11" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <!-- BSSID (MACアドレス) -->
+                    <DataGridTextColumn Header="{DynamicResource Grid_Bssid}" Binding="{Binding Bssid}" Width="140">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="FontFamily" Value="{StaticResource CodeFont}" />
+                                <Setter Property="FontSize" Value="12" />
+                                <Setter Property="Foreground" Value="#64748B" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- ==================== 3: ステータスバー ==================== -->
+        <Border Grid.Row="3" Background="#F1F5F9" BorderBrush="#CBD5E1" BorderThickness="0,1,0,0" Padding="16,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- 左側: ステータスメッセージ & スキャンスピナー -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <ProgressBar IsIndeterminate="True" Width="16" Height="16" Margin="0,0,8,0"
+                                 Visibility="{Binding IsScanning, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <TextBlock Text="{Binding StatusMessage}" Foreground="#475569" FontSize="12" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <!-- 右側: 警告・注意案内メッセージ -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"
+                            Visibility="{Binding HasWarning, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="⚠️ " Foreground="#EA580C" FontSize="12" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding WarningMessage}" Foreground="#C2410C" FontSize="12" FontWeight="Medium" VerticalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

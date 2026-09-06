@@ -1,0 +1,54 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- App General -->
+    <sys:String x:Key="App_Title">Wi-Fi Analyzer</sys:String>
+    <sys:String x:Key="App_Description">Real-time scan and analysis of surrounding Wi-Fi access points</sys:String>
+
+    <!-- Controls / Toolbar -->
+    <sys:String x:Key="Toolbar_AutoScan">Auto Scan</sys:String>
+    <sys:String x:Key="Toolbar_ManualScan">Scan Now</sys:String>
+    <sys:String x:Key="Toolbar_Interval">Interval:</sys:String>
+    <sys:String x:Key="Toolbar_Interval_3s">3 sec</sys:String>
+    <sys:String x:Key="Toolbar_Interval_5s">5 sec</sys:String>
+    <sys:String x:Key="Toolbar_Interval_10s">10 sec</sys:String>
+    <sys:String x:Key="Toolbar_Filter_All">All</sys:String>
+    <sys:String x:Key="Toolbar_Filter_24GHz">2.4 GHz</sys:String>
+    <sys:String x:Key="Toolbar_Filter_5GHz">5 GHz</sys:String>
+    <sys:String x:Key="Toolbar_Filter_6GHz">6 GHz</sys:String>
+    <sys:String x:Key="Toolbar_Search_Placeholder">Search by SSID or BSSID...</sys:String>
+    <sys:String x:Key="Toolbar_Language">Language</sys:String>
+
+    <!-- Connected Access Point Card -->
+    <sys:String x:Key="ConnectedCard_Title">Connected Network</sys:String>
+    <sys:String x:Key="ConnectedCard_NotConnected">Not connected to any Wi-Fi network</sys:String>
+    <sys:String x:Key="ConnectedCard_Interface">Adapter:</sys:String>
+    <sys:String x:Key="ConnectedCard_Signal">Signal:</sys:String>
+    <sys:String x:Key="ConnectedCard_Channel">Channel:</sys:String>
+    <sys:String x:Key="ConnectedCard_Band">Band:</sys:String>
+    <sys:String x:Key="ConnectedCard_Security">Security:</sys:String>
+    <sys:String x:Key="ConnectedCard_Bssid">BSSID:</sys:String>
+
+    <!-- DataGrid Column Headers -->
+    <sys:String x:Key="Grid_Status">Status</sys:String>
+    <sys:String x:Key="Grid_Status_Connected">Connected</sys:String>
+    <sys:String x:Key="Grid_Ssid">SSID (Network Name)</sys:String>
+    <sys:String x:Key="Grid_Bssid">BSSID (MAC Address)</sys:String>
+    <sys:String x:Key="Grid_Signal">Signal Strength</sys:String>
+    <sys:String x:Key="Grid_Band">Band</sys:String>
+    <sys:String x:Key="Grid_Channel">Channel</sys:String>
+    <sys:String x:Key="Grid_Frequency">Frequency</sys:String>
+    <sys:String x:Key="Grid_Security">Security</sys:String>
+    <sys:String x:Key="Grid_RadioType">Standard</sys:String>
+    <sys:String x:Key="Grid_HiddenNetwork">&lt;Hidden Network&gt;</sys:String>
+
+    <!-- Status Bar -->
+    <sys:String x:Key="Status_TotalNetworks">Networks: {0}</sys:String>
+    <sys:String x:Key="Status_LastScan">Last Scan: {0}</sys:String>
+    <sys:String x:Key="Status_Scanning">Scanning...</sys:String>
+    <sys:String x:Key="Status_Ready">Ready</sys:String>
+    <sys:String x:Key="Status_NoAdapter">No available Wi-Fi adapter found.</sys:String>
+    <sys:String x:Key="Status_LocationWarning">* If Windows Location Services is disabled, some SSIDs may not be displayed.</sys:String>
+
+</ResourceDictionary>
