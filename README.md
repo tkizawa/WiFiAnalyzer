@@ -72,14 +72,23 @@ dotnet run --project WiFiAnalyzer.csproj
 dotnet build -c Release
 ```
 
-### スタンドアロン exe の作成
-```powershell
-# Arm64 用
-dotnet publish -c Release -r win-arm64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o .\Installer
+### 通常インストーラー（セットアップ exe）の作成
 
-# x64 用
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o .\Installer
+Inno Setup を利用したセットアップインストーラー（x64 / Arm64）を作成するスクリプトが用意されています。
+
+```powershell
+# x64 および Arm64 両方のインストーラーを作成
+.\build-installer.ps1 -Architecture all
+
+# x64 のみ作成
+.\build-installer.ps1 -Architecture x64
+
+# Arm64 のみ作成
+.\build-installer.ps1 -Architecture arm64
 ```
+
+作成されたインストーラーは `.\Installer` フォルダに出力されます（例: `WiFiAnalyzer_Setup_v1.0.0.0_x64.exe`）。
+
 
 ---
 
