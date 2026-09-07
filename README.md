@@ -72,22 +72,27 @@ dotnet run --project WiFiAnalyzer.csproj
 dotnet build -c Release
 ```
 
-### 通常インストーラー（セットアップ exe）の作成
+### パッケージ（インストーラー / ポータブル版）の作成
 
-Inno Setup を利用したセットアップインストーラー（x64 / Arm64）を作成するスクリプトが用意されています。
+セットアップインストーラー（Inno Setup 形式）およびインストール不要でそのまま起動できるポータブル版（単一 exe）を作成するスクリプトが用意されています。
 
 ```powershell
-# x64 および Arm64 両方のインストーラーを作成
-.\build-installer.ps1 -Architecture all
+# すべて（x64 / Arm64 の通常インストーラーおよびポータブル版）を作成
+.\build-installer.ps1 -Architecture all -Type all
 
-# x64 のみ作成
-.\build-installer.ps1 -Architecture x64
+# 通常インストーラー（Setup）のみ作成
+.\build-installer.ps1 -Architecture all -Type installer
 
-# Arm64 のみ作成
-.\build-installer.ps1 -Architecture arm64
+# ポータブル版（単一 exe）のみ作成
+.\build-installer.ps1 -Architecture all -Type portable
+
+# x64 のポータブル版のみ作成
+.\build-installer.ps1 -Architecture x64 -Type portable
 ```
 
-作成されたインストーラーは `.\Installer` フォルダに出力されます（例: `WiFiAnalyzer_Setup_v1.0.0.0_x64.exe`）。
+作成された成果物は `.\Installer` フォルダに出力されます:
+- **セットアップインストーラー**: `WiFiAnalyzer_Setup_v<バージョン>_<アーキテクチャ>.exe`
+- **ポータブル版（単一 exe）**: `WiFiAnalyzer_Portable_v<バージョン>_<アーキテクチャ>.exe`
 
 
 ---
