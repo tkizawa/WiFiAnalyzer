@@ -34,4 +34,14 @@ public sealed class AppSettings
 
     /// <summary>表示言語設定 ("Auto", "ja-JP", "en-US")</summary>
     public string Language { get; set; } = "Auto";
+
+    /// <summary>ピン留め（お気に入り）されたアクセスポイントのキー一覧（BSSID）</summary>
+    public List<string> PinnedKeys { get; set; } = [];
+
+    /// <summary>お気に入りを上位表示するかどうか</summary>
+    public bool IsFavoritesOnTop { get; set; } = true;
+
+    /// <summary>SSID のソート順</summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public SsidSortOrder SsidSortOrder { get; set; } = SsidSortOrder.Default;
 }

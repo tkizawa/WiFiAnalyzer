@@ -51,4 +51,13 @@
     <sys:String x:Key="Status_NoAdapter">利用可能な Wi-Fi アダプターが見つかりません。</sys:String>
     <sys:String x:Key="Status_LocationWarning">※ Windows の位置情報サービスが無効化されている場合、一部の SSID が取得できない場合があります。</sys:String>
 
+    <!-- ピン留め・並び順 -->
+    <sys:String x:Key="Pin_PinAccessPoint">このアクセスポイントをピン留め</sys:String>
+    <sys:String x:Key="Pin_UnpinAccessPoint">ピン留めを解除</sys:String>
+    <sys:String x:Key="Sort_Ssid_Default">既定順（電波強度）</sys:String>
+    <sys:String x:Key="Sort_Ssid_Ascending">SSID 名順 (A → Z)</sys:String>
+    <sys:String x:Key="Sort_Ssid_Descending">SSID 名順 (Z → A)</sys:String>
+    <sys:String x:Key="Sort_FavoritesOnTop">お気に入りを上位表示</sys:String>
+    <sys:String x:Key="Sort_OrderMenu">表示順の指定</sys:String>
+
 </ResourceDictionary>

@@ -19,6 +19,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private CancellationTokenSource? _scanLoopCts;
     private Task? _scanLoopTask;
     private List<AccessPointInfo> _allAccessPoints = [];
+    private readonly HashSet<string> _pinnedKeys = new(StringComparer.OrdinalIgnoreCase);
     private bool _isDisposed;
 
     // --- Observable Properties (CommunityToolkit.Mvvm) ---
@@ -63,7 +64,26 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private string _currentLanguage = "Auto";
 
     /// <summary>
-    /// UI にバインドされるフィルタ適用済みのアクセスポイント一覧
+    /// お気に入りを常に上位表示するかどうか
+    /// </summary>
+    [ObservableProperty]
+    private bool _isFavoritesOnTop = true;
+
+    /// <summary>
+    /// SSID の並び順（既定、昇順、降順）
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSsidSortDefault))]
+    [NotifyPropertyChangedFor(nameof(IsSsidSortAscending))]
+    [NotifyPropertyChangedFor(nameof(IsSsidSortDescending))]
+    private SsidSortOrder _ssidSortOrder = SsidSortOrder.Default;
+
+    public bool IsSsidSortDefault => SsidSortOrder == SsidSortOrder.Default;
+    public bool IsSsidSortAscending => SsidSortOrder == SsidSortOrder.Ascending;
+    public bool IsSsidSortDescending => SsidSortOrder == SsidSortOrder.Descending;
+
+    /// <summary>
+    /// UI にバインドされるフィルタ・ソート適用済みのアクセスポイント一覧
     /// </summary>
     public ObservableCollection<AccessPointInfo> DisplayAccessPoints { get; } = [];
 
@@ -86,6 +106,16 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         _scanIntervalSeconds = settings.ScanIntervalSeconds is 3 or 5 or 10 ? settings.ScanIntervalSeconds : 3;
         _selectedBandFilter = settings.SelectedBandFilter;
         _currentLanguage = settings.Language;
+        _isFavoritesOnTop = settings.IsFavoritesOnTop;
+        _ssidSortOrder = settings.SsidSortOrder;
+
+        foreach (var key in settings.PinnedKeys)
+        {
+            if (!string.IsNullOrWhiteSpace(key))
+            {
+                _pinnedKeys.Add(key);
+            }
+        }
 
         _loc.ApplyLanguage(_currentLanguage);
         _loc.LanguageChanged += (_, _) => UpdateStatusMessages();
@@ -177,6 +207,68 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         ApplyFilter();
     }
 
+    /// <summary>
+    /// アクセスポイントのピン留め（お気に入り）トグルコマンド
+    /// </summary>
+    [RelayCommand]
+    private void TogglePin(AccessPointInfo? ap)
+    {
+        if (ap == null) return;
+
+        ap.IsPinned = !ap.IsPinned;
+        string key = !string.IsNullOrWhiteSpace(ap.Bssid) ? ap.Bssid : ap.Ssid;
+
+        if (ap.IsPinned)
+        {
+            _pinnedKeys.Add(key);
+        }
+        else
+        {
+            _pinnedKeys.Remove(key);
+        }
+
+        SaveCurrentSettings();
+        ApplyFilter();
+    }
+
+    /// <summary>
+    /// お気に入りを上位表示するかどうかのトグルコマンド
+    /// </summary>
+    [RelayCommand]
+    private void ToggleFavoritesOnTop()
+    {
+        IsFavoritesOnTop = !IsFavoritesOnTop;
+        SaveCurrentSettings();
+        ApplyFilter();
+    }
+
+    /// <summary>
+    /// SSID ソート順を切り替え（既定 → 昇順 → 降順 → 既定）
+    /// </summary>
+    [RelayCommand]
+    private void CycleSsidSortOrder()
+    {
+        SsidSortOrder = SsidSortOrder switch
+        {
+            SsidSortOrder.Default => SsidSortOrder.Ascending,
+            SsidSortOrder.Ascending => SsidSortOrder.Descending,
+            _ => SsidSortOrder.Default
+        };
+        SaveCurrentSettings();
+        ApplyFilter();
+    }
+
+    /// <summary>
+    /// 指定の SSID ソート順を設定するコマンド
+    /// </summary>
+    [RelayCommand]
+    private void SetSsidSortOrder(SsidSortOrder order)
+    {
+        SsidSortOrder = order;
+        SaveCurrentSettings();
+        ApplyFilter();
+    }
+
     private readonly CancellationTokenSource _appLifetimeCts = new();
 
     /// <summary>
@@ -203,6 +295,14 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
 
                     AdapterName = result.AdapterName ?? string.Empty;
                     ConnectedAccessPoint = result.ConnectedAccessPoint;
+
+                    // ピン留め状態を反映
+                    foreach (var ap in result.AccessPoints)
+                    {
+                        string key = !string.IsNullOrWhiteSpace(ap.Bssid) ? ap.Bssid : ap.Ssid;
+                        ap.IsPinned = _pinnedKeys.Contains(key) || (!string.IsNullOrWhiteSpace(ap.Bssid) && _pinnedKeys.Contains(ap.Bssid));
+                    }
+
                     _allAccessPoints = [.. result.AccessPoints];
 
                     // 警告チェック
@@ -307,28 +407,68 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// 周波数帯および検索テキストによるフィルタリングを適用してコレクションを更新
+    /// 周波数帯および検索テキストによるフィルタリング、およびピン留め・ソート順を適用してコレクションを更新
     /// </summary>
     private void ApplyFilter()
     {
-        var filtered = _allAccessPoints.AsEnumerable();
+        var query = _allAccessPoints.AsEnumerable();
 
         // 周波数帯フィルター
         if (SelectedBandFilter != BandType.All)
         {
-            filtered = filtered.Where(ap => ap.Band == SelectedBandFilter);
+            query = query.Where(ap => ap.Band == SelectedBandFilter);
         }
 
         // 検索文字列フィルター
         if (!string.IsNullOrWhiteSpace(SearchText))
         {
-            string query = SearchText.Trim();
-            filtered = filtered.Where(ap =>
-                ap.Ssid.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                ap.Bssid.Contains(query, StringComparison.OrdinalIgnoreCase));
+            string q = SearchText.Trim();
+            query = query.Where(ap =>
+                ap.Ssid.Contains(q, StringComparison.OrdinalIgnoreCase) ||
+                ap.Bssid.Contains(q, StringComparison.OrdinalIgnoreCase));
         }
 
-        var resultList = filtered.ToList();
+        // ソート処理
+        // 非公開ネットワークは無条件に最下部に配置 (false: 公開ネットワーク, true: 非公開ネットワーク)
+        IOrderedEnumerable<AccessPointInfo> ordered = query.OrderBy(ap => ap.IsHidden);
+
+        if (IsFavoritesOnTop)
+        {
+            // お気に入りを最優先で上位表示
+            ordered = ordered.ThenByDescending(ap => ap.IsPinned);
+
+            ordered = SsidSortOrder switch
+            {
+                SsidSortOrder.Ascending => ordered
+                    .ThenBy(ap => ap.Ssid, StringComparer.CurrentCultureIgnoreCase)
+                    .ThenByDescending(ap => ap.SignalQuality),
+                SsidSortOrder.Descending => ordered
+                    .ThenByDescending(ap => ap.Ssid, StringComparer.CurrentCultureIgnoreCase)
+                    .ThenByDescending(ap => ap.SignalQuality),
+                _ => ordered
+                    .ThenByDescending(ap => ap.IsConnected)
+                    .ThenByDescending(ap => ap.SignalQuality)
+                    .ThenBy(ap => ap.Ssid)
+            };
+        }
+        else
+        {
+            ordered = SsidSortOrder switch
+            {
+                SsidSortOrder.Ascending => ordered
+                    .ThenBy(ap => ap.Ssid, StringComparer.CurrentCultureIgnoreCase)
+                    .ThenByDescending(ap => ap.SignalQuality),
+                SsidSortOrder.Descending => ordered
+                    .ThenByDescending(ap => ap.Ssid, StringComparer.CurrentCultureIgnoreCase)
+                    .ThenByDescending(ap => ap.SignalQuality),
+                _ => ordered
+                    .ThenByDescending(ap => ap.IsConnected)
+                    .ThenByDescending(ap => ap.SignalQuality)
+                    .ThenBy(ap => ap.Ssid)
+            };
+        }
+
+        var resultList = ordered.ToList();
 
         DisplayAccessPoints.Clear();
         foreach (var item in resultList)
@@ -367,6 +507,9 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         settings.ScanIntervalSeconds = ScanIntervalSeconds;
         settings.SelectedBandFilter = SelectedBandFilter;
         settings.Language = CurrentLanguage;
+        settings.PinnedKeys = _pinnedKeys.ToList();
+        settings.IsFavoritesOnTop = IsFavoritesOnTop;
+        settings.SsidSortOrder = SsidSortOrder;
         _settingsService.Save(settings);
     }
 

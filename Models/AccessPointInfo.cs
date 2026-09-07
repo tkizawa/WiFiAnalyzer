@@ -1,9 +1,11 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace WiFiAnalyzer.Models;
 
 /// <summary>
 /// 周囲のアクセスポイント（AP）を表すデータモデル
 /// </summary>
-public sealed class AccessPointInfo
+public sealed partial class AccessPointInfo : ObservableObject
 {
     /// <summary>SSID（ネットワーク名）</summary>
     public required string Ssid { get; init; }
@@ -42,11 +44,12 @@ public sealed class AccessPointInfo
     public required string RadioType { get; init; }
 
     /// <summary>現在この PC が接続中かどうか</summary>
-    public bool IsConnected
-    {
-        get => field;
-        set => field = value;
-    } = false;
+    [ObservableProperty]
+    private bool _isConnected;
+
+    /// <summary>ピン留め（お気に入り）されているかどうか</summary>
+    [ObservableProperty]
+    private bool _isPinned;
 
     /// <summary>周波数表示用文字列 (例: "5540 MHz")</summary>
     public string FrequencyDisplay => $"{FrequencyMHz:F0} MHz";

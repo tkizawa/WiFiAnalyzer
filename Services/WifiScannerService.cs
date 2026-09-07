@@ -56,9 +56,12 @@ public sealed class WifiScannerService : IWifiScannerService
             foreach (var iface in interfaces)
             {
                 var (_, conn) = NativeWifi.GetCurrentConnection(iface.Id);
-                if (conn != null && conn.Bssid != null)
+                if (conn != null && conn.InterfaceState == InterfaceState.Connected)
                 {
-                    connectedBssid = FormatMacAddress(conn.Bssid.ToString());
+                    if (conn.Bssid != null)
+                    {
+                        connectedBssid = FormatMacAddress(conn.Bssid.ToString());
+                    }
                     connectedSsid = conn.Ssid?.ToString();
                     adapterName = iface.Description;
                     break;
@@ -122,9 +125,9 @@ public sealed class WifiScannerService : IWifiScannerService
                 // 物理無線タイプ（PHY規格）
                 string radioType = bss.PhyType.ToString();
 
-                // 接続中判定（BSSID 一致、または接続中 SSID と一致）
-                bool isConnected = (!string.IsNullOrEmpty(connectedBssid) && string.Equals(formattedBssid, connectedBssid, StringComparison.OrdinalIgnoreCase))
-                                   || (!string.IsNullOrEmpty(connectedSsid) && !isHidden && string.Equals(rawSsid, connectedSsid, StringComparison.OrdinalIgnoreCase) && bss.LinkQuality >= 50);
+                // 接続中判定: BSSID が判明している場合は BSSID の完全一致のみ
+                bool isConnected = !string.IsNullOrEmpty(connectedBssid) &&
+                                   string.Equals(formattedBssid, connectedBssid, StringComparison.OrdinalIgnoreCase);
 
                 var ap = new AccessPointInfo
                 {
@@ -146,9 +149,24 @@ public sealed class WifiScannerService : IWifiScannerService
                 apList.Add(ap);
             }
 
-            // 電波強度降順でソート（初期表示要件）
+            // 万が一 BSSID が未特定で SSID のみ取得できた場合、同一 SSID の中で最大電波強度の 1 件のみを接続中とする
+            if (string.IsNullOrEmpty(connectedBssid) && !string.IsNullOrEmpty(connectedSsid))
+            {
+                var candidate = apList
+                    .Where(x => !x.IsHidden && string.Equals(x.Ssid, connectedSsid, StringComparison.OrdinalIgnoreCase))
+                    .OrderByDescending(x => x.SignalQuality)
+                    .FirstOrDefault();
+
+                if (candidate != null)
+                {
+                    candidate.IsConnected = true;
+                }
+            }
+
+            // 初期ソート（非公開ネットワークは最下部、接続中優先、電波強度降順）
             var sortedApList = apList
-                .OrderByDescending(x => x.IsConnected)
+                .OrderBy(x => x.IsHidden)
+                .ThenByDescending(x => x.IsConnected)
                 .ThenByDescending(x => x.SignalQuality)
                 .ThenBy(x => x.Ssid)
                 .ToList();

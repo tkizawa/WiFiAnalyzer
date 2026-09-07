@@ -107,12 +107,24 @@ public partial class MainWindow : Window
         settings.ScanIntervalSeconds = _viewModel.ScanIntervalSeconds;
         settings.SelectedBandFilter = _viewModel.SelectedBandFilter;
         settings.Language = _viewModel.CurrentLanguage;
+        settings.IsFavoritesOnTop = _viewModel.IsFavoritesOnTop;
+        settings.SsidSortOrder = _viewModel.SsidSortOrder;
 
         _settingsService.Save(settings);
 
         _viewModel.Dispose();
 
         Application.Current.Shutdown();
+    }
+
+    private void OnSortMenuButtonClicked(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.ContextMenu != null)
+        {
+            btn.ContextMenu.PlacementTarget = btn;
+            btn.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            btn.ContextMenu.IsOpen = true;
+        }
     }
 
     private void OnFilterAllClicked(object sender, RoutedEventArgs e)

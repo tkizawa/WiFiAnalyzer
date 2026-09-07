@@ -12,7 +12,12 @@ public sealed class BooleanToVisibilityConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        bool boolVal = value is true;
+        bool boolVal = value switch
+        {
+            bool b => b,
+            null => false,
+            _ => true
+        };
         bool isInverse = string.Equals(parameter?.ToString(), "Inverse", StringComparison.OrdinalIgnoreCase);
 
         if (isInverse) boolVal = !boolVal;

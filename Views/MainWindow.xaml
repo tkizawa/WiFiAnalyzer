@@ -277,6 +277,57 @@
                       Background="White"
                       RowHeight="44">
                 <DataGrid.Columns>
+                    <!-- ピン留め (お気に入り) -->
+                    <DataGridTemplateColumn Width="46">
+                        <DataGridTemplateColumn.Header>
+                            <Button Command="{Binding DataContext.ToggleFavoritesOnTopCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    ToolTip="{DynamicResource Sort_FavoritesOnTop}"
+                                    Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="2"
+                                    HorizontalAlignment="Center">
+                                <TextBlock Text="📌" FontSize="12" Foreground="#64748B" HorizontalAlignment="Center" />
+                            </Button>
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type models:AccessPointInfo}">
+                                <Button Command="{Binding DataContext.TogglePinCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}"
+                                        Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center"
+                                        Padding="4">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Opacity" Value="0.35" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsPinned}" Value="True">
+                                                    <Setter Property="Opacity" Value="1.0" />
+                                                </DataTrigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Opacity" Value="0.9" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <TextBlock FontSize="15">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="☆" />
+                                                <Setter Property="Foreground" Value="#94A3B8" />
+                                                <Setter Property="ToolTip" Value="{DynamicResource Pin_PinAccessPoint}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsPinned}" Value="True">
+                                                        <Setter Property="Text" Value="★" />
+                                                        <Setter Property="Foreground" Value="#F59E0B" />
+                                                        <Setter Property="ToolTip" Value="{DynamicResource Pin_UnpinAccessPoint}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
                     <!-- 状態（接続中バッジ） -->
                     <DataGridTemplateColumn Header="{DynamicResource Grid_Status}" Width="80">
                         <DataGridTemplateColumn.CellTemplate>
@@ -290,7 +341,102 @@
                     </DataGridTemplateColumn>
 
                     <!-- SSID (ネットワーク名) -->
-                    <DataGridTemplateColumn Header="{DynamicResource Grid_Ssid}" Width="2*">
+                    <DataGridTemplateColumn Width="2*">
+                        <DataGridTemplateColumn.Header>
+                            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- SSID タイトル & クリックでソート切り替え -->
+                                <Button Grid.Column="0"
+                                        Command="{Binding DataContext.CycleSsidSortOrderCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        Background="Transparent" BorderThickness="0" Padding="0,2,4,2" Cursor="Hand"
+                                        HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="{DynamicResource Grid_Ssid}" FontWeight="SemiBold" Foreground="#334155" VerticalAlignment="Center" />
+                                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" FontSize="11" FontWeight="Bold">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="⇅" />
+                                                    <Setter Property="Foreground" Value="#94A3B8" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding DataContext.SsidSortOrder, RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="{x:Static models:SsidSortOrder.Ascending}">
+                                                            <Setter Property="Text" Value="▲ A-Z" />
+                                                            <Setter Property="Foreground" Value="#0284C7" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding DataContext.SsidSortOrder, RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="{x:Static models:SsidSortOrder.Descending}">
+                                                            <Setter Property="Text" Value="▼ Z-A" />
+                                                            <Setter Property="Foreground" Value="#0284C7" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- 右側: お気に入り上位表示トグル & ソートメニューボタン -->
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="4,0,0,0">
+                                    <!-- お気に入り上位表示トグルボタン -->
+                                    <Button Command="{Binding DataContext.ToggleFavoritesOnTopCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            ToolTip="{DynamicResource Sort_FavoritesOnTop}"
+                                            Cursor="Hand" Margin="0,0,4,0" Padding="6,2" BorderThickness="1">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Setter Property="BorderBrush" Value="#CBD5E1" />
+                                                <Setter Property="Foreground" Value="#64748B" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding DataContext.IsFavoritesOnTop, RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="True">
+                                                        <Setter Property="Background" Value="#FEF3C7" />
+                                                        <Setter Property="BorderBrush" Value="#F59E0B" />
+                                                        <Setter Property="Foreground" Value="#B45309" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="📌" FontSize="11" Margin="0,0,3,0" VerticalAlignment="Center" />
+                                            <TextBlock Text="{DynamicResource Sort_FavoritesOnTop}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+
+                                    <!-- ソートメニューボタン -->
+                                    <Button Click="OnSortMenuButtonClicked"
+                                            ToolTip="{DynamicResource Sort_OrderMenu}"
+                                            Background="Transparent" BorderBrush="#CBD5E1" BorderThickness="1"
+                                            Padding="6,2" Cursor="Hand" VerticalAlignment="Center">
+                                        <TextBlock Text="▾" FontSize="11" Foreground="#475569" FontWeight="Bold" />
+                                        <Button.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="{DynamicResource Sort_FavoritesOnTop}"
+                                                          IsCheckable="True"
+                                                          IsChecked="{Binding DataContext.IsFavoritesOnTop, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                          Command="{Binding DataContext.ToggleFavoritesOnTopCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+                                                <Separator />
+                                                <MenuItem Header="{DynamicResource Sort_Ssid_Default}"
+                                                          IsCheckable="True"
+                                                          IsChecked="{Binding DataContext.IsSsidSortDefault, RelativeSource={RelativeSource AncestorType=DataGrid}, Mode=OneWay}"
+                                                          Command="{Binding DataContext.SetSsidSortOrderCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                          CommandParameter="{x:Static models:SsidSortOrder.Default}" />
+                                                <MenuItem Header="{DynamicResource Sort_Ssid_Ascending}"
+                                                          IsCheckable="True"
+                                                          IsChecked="{Binding DataContext.IsSsidSortAscending, RelativeSource={RelativeSource AncestorType=DataGrid}, Mode=OneWay}"
+                                                          Command="{Binding DataContext.SetSsidSortOrderCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                          CommandParameter="{x:Static models:SsidSortOrder.Ascending}" />
+                                                <MenuItem Header="{DynamicResource Sort_Ssid_Descending}"
+                                                          IsCheckable="True"
+                                                          IsChecked="{Binding DataContext.IsSsidSortDescending, RelativeSource={RelativeSource AncestorType=DataGrid}, Mode=OneWay}"
+                                                          Command="{Binding DataContext.SetSsidSortOrderCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                          CommandParameter="{x:Static models:SsidSortOrder.Descending}" />
+                                            </ContextMenu>
+                                        </Button.ContextMenu>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate DataType="{x:Type models:AccessPointInfo}">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -314,6 +460,17 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
+
+                    <!-- BSSID (MACアドレス) -->
+                    <DataGridTextColumn Header="{DynamicResource Grid_Bssid}" Binding="{Binding Bssid}" Width="140">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="FontFamily" Value="{StaticResource CodeFont}" />
+                                <Setter Property="FontSize" Value="12" />
+                                <Setter Property="Foreground" Value="#64748B" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
 
                     <!-- 電波強度 (Signal Quality & Bar) -->
                     <DataGridTemplateColumn Header="{DynamicResource Grid_Signal}" Width="160">
@@ -384,17 +541,6 @@
                             <Style TargetType="TextBlock">
                                 <Setter Property="Foreground" Value="#64748B" />
                                 <Setter Property="FontSize" Value="11" />
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-
-                    <!-- BSSID (MACアドレス) -->
-                    <DataGridTextColumn Header="{DynamicResource Grid_Bssid}" Binding="{Binding Bssid}" Width="140">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="FontFamily" Value="{StaticResource CodeFont}" />
-                                <Setter Property="FontSize" Value="12" />
-                                <Setter Property="Foreground" Value="#64748B" />
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
