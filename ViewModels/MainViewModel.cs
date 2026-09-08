@@ -93,6 +93,17 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public IReadOnlyList<int> AvailableIntervals { get; } = [3, 5, 10];
 
     /// <summary>
+    /// アプリケーションのバージョン表示文字列 (例: Version 1.0.0.0)
+    /// </summary>
+    public string AppVersionDisplay { get; } =
+        $"Version {System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(4) ?? "1.0.0.0"}";
+
+    /// <summary>
+    /// ウィンドウタイトル表示文字列
+    /// </summary>
+    public string WindowTitle => $"{_loc.GetString("App_Title")} - {AppVersionDisplay}";
+
+    /// <summary>
     /// コンストラクター
     /// </summary>
     public MainViewModel(IWifiScannerService scannerService, ISettingsService settingsService)
@@ -118,7 +129,11 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         }
 
         _loc.ApplyLanguage(_currentLanguage);
-        _loc.LanguageChanged += (_, _) => UpdateStatusMessages();
+        _loc.LanguageChanged += (_, _) =>
+        {
+            UpdateStatusMessages();
+            OnPropertyChanged(nameof(WindowTitle));
+        };
 
         StatusMessage = _loc.GetString("Status_Ready");
     }
