@@ -3,7 +3,7 @@
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <!-- アプリ全般 -->
-    <sys:String x:Key="App_Title">Wi-Fi アナライザー</sys:String>
+    <sys:String x:Key="App_Title">WoodStream Wi-Fiアナライザー</sys:String>
     <sys:String x:Key="App_Description">周囲の Wi-Fi アクセスポイントをリアルタイムにスキャン・解析します</sys:String>
 
     <!-- コントロール・ツールバー -->
@@ -17,7 +17,7 @@
     <sys:String x:Key="Toolbar_Filter_24GHz">2.4 GHz</sys:String>
     <sys:String x:Key="Toolbar_Filter_5GHz">5 GHz</sys:String>
     <sys:String x:Key="Toolbar_Filter_6GHz">6 GHz</sys:String>
-    <sys:String x:Key="Toolbar_Search_Placeholder">SSID または BSSID で検索...</sys:String>
+    <sys:String x:Key="Toolbar_Search_Placeholder">SSID、BSSID、規格で検索...</sys:String>
     <sys:String x:Key="Toolbar_Language">言語 / Language</sys:String>
 
     <!-- 接続中アクセスポイントカード -->
@@ -25,6 +25,7 @@
     <sys:String x:Key="ConnectedCard_NotConnected">現在 Wi-Fi に接続されていません</sys:String>
     <sys:String x:Key="ConnectedCard_Interface">アダプター:</sys:String>
     <sys:String x:Key="ConnectedCard_Signal">電波強度:</sys:String>
+    <sys:String x:Key="ConnectedCard_RadioType">規格:</sys:String>
     <sys:String x:Key="ConnectedCard_Channel">チャンネル:</sys:String>
     <sys:String x:Key="ConnectedCard_Band">周波数帯:</sys:String>
     <sys:String x:Key="ConnectedCard_Security">セキュリティ:</sys:String>

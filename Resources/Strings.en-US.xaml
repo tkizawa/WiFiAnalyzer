@@ -3,7 +3,7 @@
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <!-- App General -->
-    <sys:String x:Key="App_Title">Wi-Fi Analyzer</sys:String>
+    <sys:String x:Key="App_Title">WoodStream Wi-Fi Analyzer</sys:String>
     <sys:String x:Key="App_Description">Real-time scan and analysis of surrounding Wi-Fi access points</sys:String>
 
     <!-- Controls / Toolbar -->
@@ -17,7 +17,7 @@
     <sys:String x:Key="Toolbar_Filter_24GHz">2.4 GHz</sys:String>
     <sys:String x:Key="Toolbar_Filter_5GHz">5 GHz</sys:String>
     <sys:String x:Key="Toolbar_Filter_6GHz">6 GHz</sys:String>
-    <sys:String x:Key="Toolbar_Search_Placeholder">Search by SSID or BSSID...</sys:String>
+    <sys:String x:Key="Toolbar_Search_Placeholder">Search SSID, BSSID, or standard...</sys:String>
     <sys:String x:Key="Toolbar_Language">Language</sys:String>
 
     <!-- Connected Access Point Card -->
@@ -25,6 +25,7 @@
     <sys:String x:Key="ConnectedCard_NotConnected">Not connected to any Wi-Fi network</sys:String>
     <sys:String x:Key="ConnectedCard_Interface">Adapter:</sys:String>
     <sys:String x:Key="ConnectedCard_Signal">Signal:</sys:String>
+    <sys:String x:Key="ConnectedCard_RadioType">Standard:</sys:String>
     <sys:String x:Key="ConnectedCard_Channel">Channel:</sys:String>
     <sys:String x:Key="ConnectedCard_Band">Band:</sys:String>
     <sys:String x:Key="ConnectedCard_Security">Security:</sys:String>

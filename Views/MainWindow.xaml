@@ -97,6 +97,9 @@
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,24,0">
                     <Image Source="pack://application:,,,/Resources/app.ico" Width="28" Height="28" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality" />
                     <TextBlock Text="{DynamicResource App_Title}" FontSize="18" FontWeight="Bold" Foreground="#0F172A" VerticalAlignment="Center" />
+                    <Border Background="#F1F5F9" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding AppVersion}" FontSize="11" FontWeight="SemiBold" Foreground="#64748B" VerticalAlignment="Center" />
+                    </Border>
                 </StackPanel>
 
                 <!-- スキャンコントロール -->
@@ -228,6 +231,9 @@
                         <WrapPanel Orientation="Horizontal">
                             <TextBlock Foreground="#475569" FontSize="12" Margin="0,0,16,0">
                                 <Run Text="{DynamicResource ConnectedCard_Bssid}" /> <Run Text="{Binding ConnectedAccessPoint.Bssid, Mode=OneWay}" FontFamily="{StaticResource CodeFont}" FontWeight="Medium" />
+                            </TextBlock>
+                            <TextBlock Foreground="#475569" FontSize="12" Margin="0,0,16,0">
+                                <Run Text="{DynamicResource ConnectedCard_RadioType}" /> <Run Text="{Binding ConnectedAccessPoint.RadioTypeDisplay, Mode=OneWay}" FontWeight="SemiBold" />
                             </TextBlock>
                             <TextBlock Foreground="#475569" FontSize="12" Margin="0,0,16,0">
                                 <Run Text="{DynamicResource ConnectedCard_Band}" /> <Run Text="{Binding ConnectedAccessPoint.BandDisplay, Mode=OneWay}" FontWeight="Medium" />
@@ -535,15 +541,25 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <!-- 規格 (RadioType) -->
-                    <DataGridTextColumn Header="{DynamicResource Grid_RadioType}" Binding="{Binding RadioType}" Width="80">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="#64748B" />
-                                <Setter Property="FontSize" Value="11" />
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
+                    <!-- 規格 (RadioType / Wi-Fi 世代 & IEEE 802.11) -->
+                    <DataGridTemplateColumn Header="{DynamicResource Grid_RadioType}" Width="165" SortMemberPath="RadioTypeDisplay">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" ToolTip="{Binding RadioTypeDisplay}">
+                                    <!-- Wi-Fi 世代バッジ（Wi-Fi 7, Wi-Fi 6/6E, Wi-Fi 5, Wi-Fi 4） -->
+                                    <Border Background="{Binding WifiGeneration, Converter={StaticResource WifiGenerationToBadgeBrushConverter}, ConverterParameter=Background}"
+                                            BorderBrush="{Binding WifiGeneration, Converter={StaticResource WifiGenerationToBadgeBrushConverter}, ConverterParameter=Border}"
+                                            BorderThickness="1" CornerRadius="4" Padding="5,1" Margin="0,0,6,0"
+                                            Visibility="{Binding HasWifiGeneration, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Text="{Binding WifiGeneration}" FontSize="11" FontWeight="Bold"
+                                                   Foreground="{Binding WifiGeneration, Converter={StaticResource WifiGenerationToBadgeBrushConverter}, ConverterParameter=Foreground}" />
+                                    </Border>
+                                    <!-- IEEE 規格名 (802.11ax, 802.11ac 等) または世代名なし規格 -->
+                                    <TextBlock Text="{Binding IeeeStandard}" FontSize="12" Foreground="#475569" FontWeight="Medium" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
@@ -554,6 +570,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <!-- 左側: ステータスメッセージ & スキャンスピナー -->
@@ -563,12 +580,15 @@
                     <TextBlock Text="{Binding StatusMessage}" Foreground="#475569" FontSize="12" VerticalAlignment="Center" />
                 </StackPanel>
 
-                <!-- 右側: 警告・注意案内メッセージ -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"
+                <!-- 中央: 警告・注意案内メッセージ -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0"
                             Visibility="{Binding HasWarning, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <TextBlock Text="⚠️ " Foreground="#EA580C" FontSize="12" VerticalAlignment="Center" />
                     <TextBlock Text="{Binding WarningMessage}" Foreground="#C2410C" FontSize="12" FontWeight="Medium" VerticalAlignment="Center" />
                 </StackPanel>
+
+                <!-- 右側: バージョン情報 -->
+                <TextBlock Grid.Column="2" Text="{Binding AppVersion}" Foreground="#64748B" FontSize="11" VerticalAlignment="Center" />
             </Grid>
         </Border>
     </Grid>

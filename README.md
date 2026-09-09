@@ -1,8 +1,8 @@
-# Wi-Fi Analyzer (Wi-Fi アナライザー)
+# WoodStream Wi-Fi Analyzer (WoodStream Wi-Fiアナライザー)
 
 周囲の Wi-Fi アクセスポイント（AP）をスキャンしてリアルタイムに一覧表示する Windows デスクトップアプリケーションです。
 
-![Wi-Fi Analyzer Icon](Resources/app.ico)
+![WoodStream Wi-Fi Analyzer Icon](Resources/app.ico)
 
 ---
 

@@ -16,7 +16,7 @@
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
     <Company>WiFiAnalyzer Project</Company>
-    <Product>WiFiAnalyzer</Product>
+    <Product>WoodStream Wi-Fi Analyzer</Product>
     <Description>Wi-Fi Access Point Real-time Scanner and Analyzer</Description>
   </PropertyGroup>
 

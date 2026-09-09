@@ -40,8 +40,20 @@ public sealed partial class AccessPointInfo : ObservableObject
     /// <summary>暗号化アルゴリズム (例: AES, TKIP, None)</summary>
     public required string Cipher { get; init; }
 
-    /// <summary>物理無線タイプ (例: 802.11ax, 802.11ac, 802.11n)</summary>
+    /// <summary>物理無線タイプ (内部値または表示用)</summary>
     public required string RadioType { get; init; }
+
+    /// <summary>Wi-Fi 世代表示（例: "Wi-Fi 6", "Wi-Fi 5", "Wi-Fi 4", ""）</summary>
+    public required string WifiGeneration { get; init; }
+
+    /// <summary>IEEE 規格名（例: "802.11ax", "802.11ac", "802.11n", "802.11g"）</summary>
+    public required string IeeeStandard { get; init; }
+
+    /// <summary>規格の表示文字列（例: "Wi-Fi 6 (IEEE 802.11ax)", "IEEE 802.11g"）</summary>
+    public required string RadioTypeDisplay { get; init; }
+
+    /// <summary>Wi-Fi 世代（Wi-Fi 4〜7 等）が存在するかどうか</summary>
+    public bool HasWifiGeneration => !string.IsNullOrEmpty(WifiGeneration);
 
     /// <summary>現在この PC が接続中かどうか</summary>
     [ObservableProperty]

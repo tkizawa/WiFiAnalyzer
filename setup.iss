@@ -1,5 +1,5 @@
 ; Inno Setup Script for WiFiAnalyzer
-#define MyAppName "WiFiAnalyzer"
+#define MyAppName "WoodStream Wi-Fi Analyzer"
 #define MyAppPublisher "WiFiAnalyzer Project"
 #define MyAppURL "https://github.com/tkizawa/WiFiAnalyzer"
 #define MyAppExeName "WiFiAnalyzer.exe"
@@ -33,7 +33,7 @@ DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 OutputDir={#MyOutputDir}
-OutputBaseFilename={#MyAppName}_Setup_v{#MyAppVersion}_{#MyAppArch}
+OutputBaseFilename=WiFiAnalyzer_Setup_v{#MyAppVersion}_{#MyAppArch}
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern

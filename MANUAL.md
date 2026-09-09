@@ -1,6 +1,6 @@
-# Wi-Fi Analyzer 操作説明書 (User Manual)
+# WoodStream Wi-Fi Analyzer 操作説明書 (User Manual)
 
-周囲の Wi-Fi 電波状況をリアルタイムにスキャン・可視化するデスクトップアプリケーション「**Wi-Fi Analyzer**」の操作説明書です。
+周囲の Wi-Fi 電波状況をリアルタイムにスキャン・可視化するデスクトップアプリケーション「**WoodStream Wi-Fiアナライザー**（英語: **WoodStream Wi-Fi Analyzer**）」の操作説明書です。
 
 ---
 

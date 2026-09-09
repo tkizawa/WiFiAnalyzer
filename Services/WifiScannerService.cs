@@ -122,8 +122,8 @@ public sealed class WifiScannerService : IWifiScannerService
                     cipher = ac.Cipher;
                 }
 
-                // 物理無線タイプ（PHY規格）
-                string radioType = bss.PhyType.ToString();
+                // 物理無線タイプ（PHY規格）と Wi-Fi 世代・IEEE規格
+                var (wifiGen, ieeeStd, radioDisplay) = DetermineRadioType(bss.PhyType, bandType);
 
                 // 接続中判定: BSSID が判明している場合は BSSID の完全一致のみ
                 bool isConnected = !string.IsNullOrEmpty(connectedBssid) &&
@@ -142,7 +142,10 @@ public sealed class WifiScannerService : IWifiScannerService
                     FrequencyMHz = freqMhz,
                     Authentication = auth,
                     Cipher = cipher,
-                    RadioType = radioType,
+                    RadioType = radioDisplay,
+                    WifiGeneration = wifiGen,
+                    IeeeStandard = ieeeStd,
+                    RadioTypeDisplay = radioDisplay,
                     IsConnected = isConnected
                 };
 
@@ -243,6 +246,30 @@ public sealed class WifiScannerService : IWifiScannerService
         "WPA3_Enterprise" => "WPA3-Enterprise",
         _ => auth.Replace('_', '-')
     };
+
+    /// <summary>
+    /// ManagedNativeWifi の PhyType と周波数帯から Wi-Fi 世代名、IEEE 規格名、および総合表示文字列を特定します。
+    /// </summary>
+    private static (string Generation, string IeeeStandard, string FullDisplay) DetermineRadioType(PhyType phyType, BandType band)
+    {
+        return phyType switch
+        {
+            PhyType.Eht => ("Wi-Fi 7", "802.11be", "Wi-Fi 7 (IEEE 802.11be)"),
+            PhyType.He => band == BandType.Band6GHz
+                ? ("Wi-Fi 6E", "802.11ax", "Wi-Fi 6E (IEEE 802.11ax)")
+                : ("Wi-Fi 6", "802.11ax", "Wi-Fi 6 (IEEE 802.11ax)"),
+            PhyType.Vht => ("Wi-Fi 5", "802.11ac", "Wi-Fi 5 (IEEE 802.11ac)"),
+            PhyType.Ht => ("Wi-Fi 4", "802.11n", "Wi-Fi 4 (IEEE 802.11n)"),
+            PhyType.Erp => (string.Empty, "802.11g", "IEEE 802.11g"),
+            PhyType.HrDsss => (string.Empty, "802.11b", "IEEE 802.11b"),
+            PhyType.Ofdm => (string.Empty, "802.11a", "IEEE 802.11a"),
+            PhyType.Dmg => ("WiGig", "802.11ad", "WiGig (IEEE 802.11ad)"),
+            PhyType.Dsss => (string.Empty, "802.11", "IEEE 802.11 (DSSS)"),
+            PhyType.Fhss => (string.Empty, "802.11", "IEEE 802.11 (FHSS)"),
+            PhyType.IrBaseband => (string.Empty, "802.11", "IEEE 802.11 (IR)"),
+            _ => (string.Empty, phyType.ToString(), phyType.ToString())
+        };
+    }
 
     public void Dispose()
     {

@@ -14,6 +14,7 @@
             <converters:SignalToBrushConverter x:Key="SignalToBrushConverter" />
             <converters:BandToBadgeBrushConverter x:Key="BandToBadgeBrushConverter" />
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:WifiGenerationToBadgeBrushConverter x:Key="WifiGenerationToBadgeBrushConverter" />
 
             <!-- グローバルスタイル定義 -->
             <FontFamily x:Key="MainFont">Segoe UI Variable, Segoe UI, Meiryo, sans-serif</FontFamily>

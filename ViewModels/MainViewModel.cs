@@ -93,6 +93,11 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public IReadOnlyList<int> AvailableIntervals { get; } = [3, 5, 10];
 
     /// <summary>
+    /// アプリケーションのバージョン表示（例: Version 1.0.0.0）
+    /// </summary>
+    public string AppVersion { get; } = $"Version {typeof(MainViewModel).Assembly.GetName().Version?.ToString(4) ?? "1.0.0.0"}";
+
+    /// <summary>
     /// コンストラクター
     /// </summary>
     public MainViewModel(IWifiScannerService scannerService, ISettingsService settingsService)
@@ -425,7 +430,8 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
             string q = SearchText.Trim();
             query = query.Where(ap =>
                 ap.Ssid.Contains(q, StringComparison.OrdinalIgnoreCase) ||
-                ap.Bssid.Contains(q, StringComparison.OrdinalIgnoreCase));
+                ap.Bssid.Contains(q, StringComparison.OrdinalIgnoreCase) ||
+                ap.RadioTypeDisplay.Contains(q, StringComparison.OrdinalIgnoreCase));
         }
 
         // ソート処理
